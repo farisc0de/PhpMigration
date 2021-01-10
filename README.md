@@ -1,5 +1,5 @@
 # PhpMigration
-Migration Framework for PHP
+Migration Library for PHP
 
 This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanitization)
 
