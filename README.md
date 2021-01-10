@@ -6,14 +6,14 @@ This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanit
 ## How to use
 
 ```php
-include_once 'config.php'
+include_once 'config.php';
 include_once 'Database.php';
 include_once 'Sanitization.php';
 include_once 'Migration.php';
 
 
 $db = new Database();
-$sanitize = new new Sanitization();
+$sanitize = new Sanitization();
 $migrate = new Migration($db, $sanitize);
 
 
