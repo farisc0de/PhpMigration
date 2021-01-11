@@ -6,6 +6,8 @@ This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanit
 ## How to use
 
 ```php
+<?php
+
 include_once 'config.php';
 include_once 'Database.php';
 include_once 'Sanitization.php';
