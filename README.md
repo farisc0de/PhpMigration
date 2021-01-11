@@ -6,7 +6,6 @@ This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanit
 ## How to use
 
 ```php
-<?php
 
 include_once 'config.php';
 include_once 'Database.php';
@@ -26,6 +25,7 @@ $migrate->createTable("users", [['id', 'int', 'unsigned', 'not null']]);
 // Make it a primary key
 
 $migrate->isPrimary("users", "id");
+
 ```
 
 ## Copyright
