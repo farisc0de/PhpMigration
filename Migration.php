@@ -68,7 +68,7 @@ class Migration
 
         $column = rtrim($column, ", ");
 
-        $table_name = $this->utils->esc($table_name);
+        $table_name = $this->utils->useSanitize($table_name);
 
         $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", $table_name, $column);
 
@@ -93,8 +93,8 @@ class Migration
         $this->db->query(
             sprintf(
                 "ALTER TABLE %s ADD PRIMARY KEY (%s);",
-                $this->utils->esc($table_name),
-                $this->utils->esc($column_name)
+                $this->utils->useSanitize($table_name),
+                $this->utils->useSanitize($column_name)
             )
         );
 
@@ -115,7 +115,7 @@ class Migration
     {
         $this->db->query(sprintf(
             "ALTER TABLE %s MODIFY %s AUTO_INCREMENT;",
-            $this->utils->esc($table_name),
+            $this->utils->useSanitize($table_name),
             implode(" ", $column_array)
         ));
 
@@ -136,7 +136,7 @@ class Migration
     {
         $this->db->query(sprintf(
             "ALTER TABLE %s ADD UNIQUE KEY %s (%s);",
-            $this->utils->esc($table_name),
+            $this->utils->useSanitize($table_name),
             $column_name,
             $column_name
         ));
@@ -165,7 +165,7 @@ class Migration
         $sql = sprintf($create_column_syntex, $table_name, $column);
 
         if ($after != null) {
-            $sql .= " AFTER  " . $this->utils->esc($after);
+            $sql .= " AFTER  " . $this->utils->useSanitize($after);
         }
 
         $sql = $sql . ";";
@@ -210,8 +210,8 @@ class Migration
     {
         $sql = sprintf(
             "ALTER TABLE %s RENAME TO %s;",
-            $this->utils->esc($oldTable),
-            $this->utils->esc($newTable)
+            $this->utils->useSanitize($oldTable),
+            $this->utils->useSanitize($newTable)
         );
 
         $this->db->query($sql);
@@ -236,7 +236,7 @@ class Migration
     {
         $sql = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
-            $this->utils->esc($table_name),
+            $this->utils->useSanitize($table_name),
             implode(", ", array_keys($columns_array)),
             ":" . implode(",:", array_keys($columns_array))
         );
@@ -266,8 +266,8 @@ class Migration
     {
         $sql = sprintf(
             "UPDATE %s SET %s = :value",
-            $this->utils->esc($table_name),
-            $this->utils->esc($column_name)
+            $this->utils->useSanitize($table_name),
+            $this->utils->useSanitize($column_name)
         );
 
         $this->db->query($sql);
@@ -332,8 +332,8 @@ class Migration
     {
         $sql = sprintf(
             "ALTER TABLE %s DROP COLUMN %s;",
-            $this->utils->esc($table_name),
-            $this->utils->esc($column_name)
+            $this->utils->useSanitize($table_name),
+            $this->utils->useSanitize($column_name)
         );
 
         $this->db->query($sql);
@@ -350,7 +350,7 @@ class Migration
      */
     public function dropTable($table_name)
     {
-        $sql = sprintf("DROP TABLE %s;", $this->utils->esc($table_name));
+        $sql = sprintf("DROP TABLE %s;", $this->utils->useSanitize($table_name));
 
         $this->db->query($sql);
 
