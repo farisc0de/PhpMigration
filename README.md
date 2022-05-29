@@ -17,7 +17,6 @@ $db = new Database($config);
 $utils = new Utils();
 $migrate = new Migration($db, $utils);
 
-
 // Create Table
 
 $migrate->createTable("users", [
@@ -29,7 +28,7 @@ $migrate->createTable("users", [
     ]
 ]);
 
-// Make it a primary key
+// Create a primary key
 
 $migrate->isPrimary("users", "id"); 
 
