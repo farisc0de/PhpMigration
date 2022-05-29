@@ -14,16 +14,6 @@ class Migration
      * @var Utils
      */
     private $utils;
-    /**
-     * 
-     * @var Types
-     */
-    public $types;
-    /**
-     * 
-     * @var Options
-     */
-    public $options;
 
     /**
      * Update class constructor
@@ -39,10 +29,6 @@ class Migration
         $this->db = $database;
 
         $this->utils = $utils;
-
-        $this->types = new Types;
-
-        $this->options = new Options;
     }
 
     /**

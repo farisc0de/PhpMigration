@@ -1,7 +1,6 @@
 # PhpMigration
-Migration Library for PHP
 
-This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanitization)
+Migration Library for PHP
 
 ## How to use
 
@@ -9,18 +8,26 @@ This project requires [PhpSanitization](https://github.com/fariscode511/PhpSanit
 
 include_once 'config.php';
 include_once 'Database.php';
-include_once 'Sanitization.php';
+include_once 'Utils.php';
+include_once 'Options/Options.php';
+include_once 'Options/Types.php';
 include_once 'Migration.php';
 
-
-$db = new Database();
-$sanitize = new Sanitization();
-$migrate = new Migration($db, $sanitize);
+$db = new Database($config);
+$utils = new Utils();
+$migrate = new Migration($db, $utils);
 
 
 // Create Table
 
-$migrate->createTable("users", [['id', 'int', 'unsigned', 'not null']]);
+$migrate->createTable("users", [
+    [
+        'id',
+        Types::Integer(),
+        Opttions::UnSigned(),
+        Opttions::NotNull()
+    ]
+]);
 
 // Make it a primary key
 
@@ -29,4 +36,5 @@ $migrate->isPrimary("users", "id");
 ```
 
 ## Copyright
+
 FarisCode
