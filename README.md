@@ -24,8 +24,8 @@ $migrate->createTable("users", [
     [
         'id',
         Types::Integer(),
-        Opttions::UnSigned(),
-        Opttions::NotNull()
+        Options::UnSigned(),
+        Options::NotNull()
     ]
 ]);
 
