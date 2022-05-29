@@ -7,25 +7,25 @@ class Database
      *
      * @var string
      */
-    private $host = DB_HOST;
+    private $host;
     /**
      * Database Username
      *
      * @var string
      */
-    private $user = DB_USER;
+    private $user;
     /**
      * Database Password
      *
      * @var string
      */
-    private $pass = DB_PASS;
+    private $pass;
     /**
      * Database Name
      *
      * @var string
      */
-    private $dbname = DB_NAME;
+    private $dbname;
     /**
      * Database Connection
      *
@@ -41,7 +41,7 @@ class Database
     /**
      * Database PDO Statment
      *
-     * @var \PDOStatement|bool
+     * @var mixed
      */
     private $stmt;
     /**
@@ -50,17 +50,39 @@ class Database
      * @var bool
      */
     private $dbconnected = false;
+    /**
+     * Controls the contents of the returned array
+     *
+     * @var int
+     */
+    private $fetch_style = \PDO::FETCH_OBJ;
 
     /**
      * Database class constructor
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($config)
     {
+        if ($config != []) {
+            $this->host = $config['DB_HOST'];
+            $this->user = $config['DB_USER'];
+            $this->pass = $config['DB_PASS'];
+            $this->dbname = $config['DB_NAME'];
+        }
 
+        $this->connect();
+    }
+
+    /**
+     * Create a connection between PHP and a database server.
+     *
+     * @return void
+     */
+    private function connect()
+    {
         // Set PDO Connection
-        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8';
+        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
         $options = array(
             \PDO::ATTR_PERSISTENT => true,
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -98,10 +120,10 @@ class Database
     }
 
     /**
-     * Prepare the statement with SQL query
+     * Prepares a statement for execution and returns a statement object
      *
      * @param string $query
-     *  The SQL query you want to execute
+     *  This must be a valid SQL statement for the target database server.
      * @return void
      */
     public function query($query)
@@ -121,10 +143,10 @@ class Database
     }
 
     /**
-     * Execute a query without results
+     * Execute an SQL statement and return the number of affected rows
      *
      * @param mixed $query
-     *  The SQL query you want to execute
+     *  The SQL statement to prepare and execute.
      * @return mixed
      *  Returns the number of rows that were modified or deleted
      */
@@ -141,7 +163,7 @@ class Database
      */
     public function resultset()
     {
-        $data = $this->stmt->fetchAll(\PDO::FETCH_OBJ);
+        $data = $this->stmt->fetchAll($this->fetch_style);
         if (is_array($data)) {
             return $data;
         }
@@ -169,7 +191,7 @@ class Database
      */
     public function single()
     {
-        $data = $this->stmt->fetch(\PDO::FETCH_OBJ);
+        $data = $this->stmt->fetch($this->fetch_style);
 
         if (is_object($data)) {
             return $data;

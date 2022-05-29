@@ -8,13 +8,22 @@ class Migration
      * @var Database
      */
     private $db;
-
     /**
-     * Sanitization Object
+     * Utils Connection
      *
-     * @var Sanitization
+     * @var Utils
      */
     private $utils;
+    /**
+     * 
+     * @var Types
+     */
+    public $types;
+    /**
+     * 
+     * @var Options
+     */
+    public $options;
 
     /**
      * Update class constructor
@@ -30,7 +39,12 @@ class Migration
         $this->db = $database;
 
         $this->utils = $utils;
+
+        $this->types = new Types;
+
+        $this->options = new Options;
     }
+
     /**
      * Function to create a database in MySQL when needed
      *
@@ -53,24 +67,24 @@ class Migration
      *
      * @param string $table_name
      *  The table name you want to create in the database
-     * @param array $columns
+     * @param array $arrays
      *  An array contains the table columns as arrays
      * @return bool
      *  Return true if the table is created false otherwise
      */
     public function createTable($table_name, $columns)
     {
-        $column = "";
+        $query = "";
 
-        foreach ($columns as $column_settings) {
-            $column .= implode(" ", $column_settings) . ", ";
+        foreach ($columns as $column) {
+            $query .= implode(" ", $column) . ", ";
         }
 
-        $column = rtrim($column, ", ");
+        $query = rtrim($query, ", ");
 
-        $table_name = $this->utils->useSanitize($table_name);
+        $table_name = $this->utils->sanitize($table_name);
 
-        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", $table_name, $column);
+        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", $table_name, $query);
 
         $this->db->query($sql);
 
@@ -87,14 +101,14 @@ class Migration
      * @return bool
      *  Return true if the column is modified otherwise false
      */
-    public function isPrimary($table_name, $column_name)
+    public function setPrimary($table_name, $column_name)
     {
 
         $this->db->query(
             sprintf(
                 "ALTER TABLE %s ADD PRIMARY KEY (%s);",
-                $this->utils->useSanitize($table_name),
-                $this->utils->useSanitize($column_name)
+                $this->utils->sanitize($table_name),
+                $this->utils->sanitize($column_name)
             )
         );
 
@@ -111,11 +125,11 @@ class Migration
      * @return bool
      *  Return true if the column is modified otherwise false
      */
-    public function isAutoinc($table_name, $column_array)
+    public function setAutoinc($table_name, $column_array)
     {
         $this->db->query(sprintf(
             "ALTER TABLE %s MODIFY %s AUTO_INCREMENT;",
-            $this->utils->useSanitize($table_name),
+            $this->utils->sanitize($table_name),
             implode(" ", $column_array)
         ));
 
@@ -132,11 +146,11 @@ class Migration
      * @return bool
      *  Return true if the column is modified otherwise false
      */
-    public function isUnique($table_name, $column_name)
+    public function setUnique($table_name, $column_name)
     {
         $this->db->query(sprintf(
             "ALTER TABLE %s ADD UNIQUE KEY %s (%s);",
-            $this->utils->useSanitize($table_name),
+            $this->utils->sanitize($table_name),
             $column_name,
             $column_name
         ));
@@ -149,23 +163,23 @@ class Migration
      *
      * @param string $table_name
      *  The table name that you want to modify
-     * @param array $column_array
+     * @param array $array
      *  An array contains the new columns array
      * @param mixed $after
      *  If you want to add the new columns after a specific column [optional]
      * @return bool
      *  Return true if the column is added or false otherwise
      */
-    public function createColumn($table_name, $column_array, $after = null)
+    public function createColumn($table_name, $column, $after = null)
     {
         $create_column_syntex = "ALTER TABLE %s ADD %s";
 
-        $column = implode(" ", $column_array);
+        $column = implode(" ", $column);
 
         $sql = sprintf($create_column_syntex, $table_name, $column);
 
         if ($after != null) {
-            $sql .= " AFTER  " . $this->utils->useSanitize($after);
+            $sql .= " AFTER  " . $this->utils->sanitize($after);
         }
 
         $sql = $sql . ";";
@@ -210,8 +224,8 @@ class Migration
     {
         $sql = sprintf(
             "ALTER TABLE %s RENAME TO %s;",
-            $this->utils->useSanitize($oldTable),
-            $this->utils->useSanitize($newTable)
+            $this->utils->sanitize($oldTable),
+            $this->utils->sanitize($newTable)
         );
 
         $this->db->query($sql);
@@ -225,7 +239,8 @@ class Migration
      * @param string $table_name
      *  The table you want to insert data to
      * @param array $columns_array
-     *  An associative array that contains the column name as the key
+     *  The column array should be an associative array that contains the column name as the
+     *  key
      *
      *  Example: ["username" => "admin"]
      *
@@ -236,7 +251,7 @@ class Migration
     {
         $sql = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
-            $this->utils->useSanitize($table_name),
+            $this->utils->sanitize($table_name),
             implode(", ", array_keys($columns_array)),
             ":" . implode(",:", array_keys($columns_array))
         );
@@ -266,8 +281,8 @@ class Migration
     {
         $sql = sprintf(
             "UPDATE %s SET %s = :value",
-            $this->utils->useSanitize($table_name),
-            $this->utils->useSanitize($column_name)
+            $this->utils->sanitize($table_name),
+            $this->utils->sanitize($column_name)
         );
 
         $this->db->query($sql);
@@ -276,48 +291,24 @@ class Migration
 
         return $this->db->execute();
     }
+
     /**
-     * Check if table exist or not
+     * Drop and remove a table from the database when needed
      *
      * @param string $table_name
+     *  The table name you want to remove
      * @return bool
+     *  Return true if the table is removed otherwise false
      */
-    public function checkIfTableExist($table_name)
+    public function dropTable($table_name)
     {
-        $sql = sprintf(
-            "SELECT *  FROM information_schema.tables
-             WHERE table_schema = '%s'
-             AND table_name = '%s' LIMIT 1;",
-            $this->db->returnDbName(),
-            $this->utils->sanitize($table_name)
-        );
+        $sql = sprintf("DROP TABLE %s;", $this->utils->sanitize($table_name));
 
         $this->db->query($sql);
 
-        $this->db->execute();
-
-        if ($this->db->rowCount() >= 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return $this->db->execute();
     }
-    /**
-     * Count the rows in table`
-     *
-     * @param string $table_name
-     * @return int
-     */
-    public function countRows($table_name)
-    {
-        $sql = sprintf("SELECT * FROM %s;", $this->utils->sanitize($table_name));
 
-        $this->db->query($sql);
-
-        $this->db->execute();
-
-        return $this->db->rowCount();
-    }
     /**
      * Drop and remove a column from a table when needed
      *
@@ -332,46 +323,15 @@ class Migration
     {
         $sql = sprintf(
             "ALTER TABLE %s DROP COLUMN %s;",
-            $this->utils->useSanitize($table_name),
-            $this->utils->useSanitize($column_name)
+            $this->utils->sanitize($table_name),
+            $this->utils->sanitize($column_name)
         );
 
         $this->db->query($sql);
 
         return $this->db->execute();
     }
-    /**
-     * Drop and remove a table from the database when needed
-     *
-     * @param string $table_name
-     *  The table name you want to remove
-     * @return bool
-     *  Return true if the table is removed otherwise false
-     */
-    public function dropTable($table_name)
-    {
-        $sql = sprintf("DROP TABLE %s;", $this->utils->useSanitize($table_name));
 
-        $this->db->query($sql);
-
-        return $this->db->execute();
-    }
-    /**
-     * Truncate and remove a table data from the database when needed
-     *
-     * @param string $table_name
-     *  The table name you want to remove its data
-     * @return bool
-     *  Return true if the table's data is removed otherwise false
-     */
-    public function truncateTable($table_name)
-    {
-        $sql = sprintf("TRUNCATE TABLE %s;", $this->utils->sanitize($table_name));
-
-        $this->db->query($sql);
-
-        return $this->db->execute();
-    }
     /**
      * Drop and remove the database completely when needed
      *
@@ -389,5 +349,14 @@ class Migration
         $this->db->query($sql);
 
         return $this->db->execute();
+    }
+
+    public function createIndex($table, $column)
+    {
+        $sql = sprintf("ALTER TABLE %s ADD INDEX(%s);", $table, $column);
+
+        $this->db->query($sql);
+
+        $this->db->execute();
     }
 }
