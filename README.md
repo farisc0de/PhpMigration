@@ -30,7 +30,7 @@ $migrate->createTable("users", [
 
 // Create a primary key
 
-$migrate->isPrimary("users", "id"); 
+$migrate->setPrimary("users", "id"); 
 
 ```
 
