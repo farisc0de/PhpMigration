@@ -1,5 +1,7 @@
 <?php
 
+namespace Farisc0de\PhpMigration;
+
 class Migration
 {
     /**
@@ -72,7 +74,7 @@ class Migration
 
         $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", $table_name, $query);
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -90,7 +92,7 @@ class Migration
     public function setPrimary($table_name, $column_name)
     {
 
-        $this->db->query(
+        $this->db->prepare(
             sprintf(
                 "ALTER TABLE %s ADD PRIMARY KEY (%s);",
                 $this->utils->sanitize($table_name),
@@ -113,7 +115,7 @@ class Migration
      */
     public function setAutoinc($table_name, $column_array)
     {
-        $this->db->query(sprintf(
+        $this->db->prepare(sprintf(
             "ALTER TABLE %s MODIFY %s AUTO_INCREMENT;",
             $this->utils->sanitize($table_name),
             implode(" ", $column_array)
@@ -134,7 +136,7 @@ class Migration
      */
     public function setUnique($table_name, $column_name)
     {
-        $this->db->query(sprintf(
+        $this->db->prepare(sprintf(
             "ALTER TABLE %s ADD UNIQUE KEY %s (%s);",
             $this->utils->sanitize($table_name),
             $column_name,
@@ -170,7 +172,7 @@ class Migration
 
         $sql = $sql . ";";
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -191,7 +193,7 @@ class Migration
 
         $sql = sprintf($alter_syntax, $table_name, implode(" ", $column_array));
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -214,7 +216,7 @@ class Migration
             $this->utils->sanitize($newTable)
         );
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -225,8 +227,7 @@ class Migration
      * @param string $table_name
      *  The table you want to insert data to
      * @param array $columns_array
-     *  The column array should be an associative array that contains the column name as the
-     *  key
+     *  The column array should be an associative array that contains the column name as the key
      *
      *  Example: ["username" => "admin"]
      *
@@ -242,7 +243,7 @@ class Migration
             ":" . implode(",:", array_keys($columns_array))
         );
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         foreach ($columns_array as $key => $value) {
             $this->db->bind(":" . $key, $value);
@@ -271,7 +272,34 @@ class Migration
             $this->utils->sanitize($column_name)
         );
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
+
+        $this->db->bind(":value", $value);
+
+        return $this->db->execute();
+    }
+
+    /**
+     * Delete a value from a column in a table
+     *
+     * @param string $table_name
+     *  The table name you want to modify
+     * @param string $column_name
+     *  The column name you want to delete its value
+     * @param mixed $value
+     *  The value you want to delete
+     * @return bool
+     *  Return true if the value is deleted or false otherwise
+     */
+    public function deleteValue($table_name, $column_name, $value)
+    {
+        $sql = sprintf(
+            "DELETE FROM %s WHERE %s = :value",
+            $this->utils->sanitize($table_name),
+            $this->utils->sanitize($column_name)
+        );
+
+        $this->db->prepare($sql);
 
         $this->db->bind(":value", $value);
 
@@ -290,7 +318,7 @@ class Migration
     {
         $sql = sprintf("DROP TABLE %s;", $this->utils->sanitize($table_name));
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -313,7 +341,7 @@ class Migration
             $this->utils->sanitize($column_name)
         );
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
@@ -332,16 +360,27 @@ class Migration
 
         $sql = sprintf($drop_db_syntax, $database_name);
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         return $this->db->execute();
     }
 
+
+    /**
+     * Add INDEX to a column
+     *
+     * @param string $table_name
+     *  The table name that you want to add the index to it
+     * @param string $column
+     *  the column inside the table you want add index to it
+     * @return bool
+     *  return true if the operation is a success of false otherwise
+     */
     public function createIndex($table, $column)
     {
         $sql = sprintf("ALTER TABLE %s ADD INDEX(%s);", $table, $column);
 
-        $this->db->query($sql);
+        $this->db->prepare($sql);
 
         $this->db->execute();
     }

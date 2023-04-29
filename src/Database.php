@@ -1,5 +1,7 @@
 <?php
 
+namespace Farisc0de\PhpMigration;
+
 class Database
 {
     /**
@@ -41,7 +43,7 @@ class Database
     /**
      * Database PDO Statment
      *
-     * @var mixed
+     * @var \PDOStatement|bool
      */
     private $stmt;
     /**
@@ -97,6 +99,7 @@ class Database
         }
     }
 
+
     /**
      * Get the Error Message
      *
@@ -120,15 +123,27 @@ class Database
     }
 
     /**
-     * Prepares a statement for execution and returns a statement object
+     * Prepare the statement with SQL query
      *
      * @param string $query
-     *  This must be a valid SQL statement for the target database server.
+     *  The SQL query you want to execute
+     * @return void
+     */
+    public function prepare($query)
+    {
+        $this->stmt = $this->connection->prepare($query);
+    }
+
+    /**
+     * Prepare the statement with SQL query
+     *
+     * @param string $query
+     *  The SQL query you want to execute
      * @return void
      */
     public function query($query)
     {
-        $this->stmt = $this->connection->prepare($query);
+        $this->stmt = $this->connection->query($query);
     }
 
     /**
@@ -143,10 +158,10 @@ class Database
     }
 
     /**
-     * Execute an SQL statement and return the number of affected rows
+     * Execute a query without results
      *
      * @param mixed $query
-     *  The SQL statement to prepare and execute.
+     *  The SQL query you want to execute
      * @return mixed
      *  Returns the number of rows that were modified or deleted
      */
@@ -164,9 +179,7 @@ class Database
     public function resultset()
     {
         $data = $this->stmt->fetchAll($this->fetch_style);
-        if (is_array($data)) {
-            return $data;
-        }
+        return is_array($data) ? $data : array();
     }
 
     /**
@@ -178,9 +191,7 @@ class Database
     public function rowCount()
     {
         $data = $this->stmt->rowCount();
-        if (is_int($data)) {
-            return $data;
-        }
+        return is_int($data) ? $data : 0;
     }
 
     /**
@@ -192,12 +203,7 @@ class Database
     public function single()
     {
         $data = $this->stmt->fetch($this->fetch_style);
-
-        if (is_object($data)) {
-            return $data;
-        } else {
-            return false;
-        }
+        return is_object($data) ? $data : false;
     }
 
     /**
@@ -239,8 +245,43 @@ class Database
                     $type = \PDO::PARAM_STR;
             }
         }
+
         $this->stmt->bindValue($param, $value, $type);
     }
+
+    /**
+     * Begin a transaction
+     *
+     * @return bool
+     * @throws \PDOException
+     */
+    public function beginTransaction()
+    {
+        return $this->connection->beginTransaction();
+    }
+
+    /**
+     * Commit a successfull transaction
+     *
+     * @return bool
+     * @throws \PDOException
+     */
+    public function commit()
+    {
+        return $this->connection->commit();
+    }
+
+    /**
+     * Rollback a failed transaction
+     *
+     * @return bool
+     * @throws \PDOException
+     */
+    public function rollback()
+    {
+        return $this->connection->rollBack();
+    }
+
     /**
      * Return the Database Name
      *
@@ -250,6 +291,7 @@ class Database
     {
         return $this->dbname;
     }
+
     /**
      * Close the database connection
      *

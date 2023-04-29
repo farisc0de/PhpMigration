@@ -1,5 +1,7 @@
 <?php
 
+namespace Farisc0de\PhpMigration;
+
 class Utils
 {
     /**
