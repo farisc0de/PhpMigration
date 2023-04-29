@@ -23,12 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Create a new table
     $obj->createTable(
         "users",
-        ["id", Types::Integer(), Options::AutoIncrement(), Options::NotNull()],
-        ["username", Types::String(255), Options::NotNull()],
-        ["password", Types::String(255), Options::NotNull()],
-        ["email", Types::String(255), Options::NotNull()],
-        ["created_at", Types::TimeStamp(), Options::CurrentTimeStamp()],
-        ["updated_at", Types::TimeStamp(), Options::CurrentTimeStamp()]
+        [
+            ["id", Types::Integer(), Options::AutoIncrement(), Options::NotNull()],
+            ["username", Types::String(255), Options::NotNull()],
+            ["password", Types::String(255), Options::NotNull()],
+            ["email", Types::String(255), Options::NotNull()],
+            ["created_at", Types::TimeStamp(), Options::CurrentTimeStamp()],
+            ["updated_at", Types::TimeStamp(), Options::CurrentTimeStamp()]
+        ]
     );
 
     // Create Primary Key

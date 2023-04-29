@@ -17,12 +17,14 @@ $obj = new Migration(new Database($config), new Utils());
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $obj->createTable(
         "users",
-        ["id", Types::Integer(), Options::AutoIncrement(), Options::NotNull()],
-        ["username", Types::String(255), Options::NotNull()],
-        ["password", Types::String(255), Options::NotNull()],
-        ["email", Types::String(255), Options::NotNull()],
-        ["created_at", Types::TimeStamp(), Options::CurrentTimeStamp()],
-        ["updated_at", Types::TimeStamp(), Options::CurrentTimeStamp()]
+        [
+            ["id", Types::Integer(), Options::AutoIncrement(), Options::NotNull()],
+            ["username", Types::String(255), Options::NotNull()],
+            ["password", Types::String(255), Options::NotNull()],
+            ["email", Types::String(255), Options::NotNull()],
+            ["created_at", Types::TimeStamp(), Options::CurrentTimeStamp()],
+            ["updated_at", Types::TimeStamp(), Options::CurrentTimeStamp()]
+        ]
     );
 
     $obj->setPrimary("users", "id");
