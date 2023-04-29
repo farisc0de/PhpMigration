@@ -5,32 +5,46 @@ Migration Library for PHP
 ## How to use
 
 ```php
+include_once __DIR__ . '/src/Database.php';
+include_once __DIR__ . '/src/Utils.php';
+include_once __DIR__ . '/src/Migration.php';
+include_once __DIR__ . '/config.php';
 
-include_once 'config.php';
-include_once 'Database.php';
-include_once 'Utils.php';
-include_once 'Options/Options.php';
-include_once 'Options/Types.php';
-include_once 'Migration.php';
+use Farisc0de\PhpMigration\Database;
+use Farisc0de\PhpMigration\Options\Options;
+use Farisc0de\PhpMigration\Options\Types;
+use Farisc0de\PhpMigration\Utils;
+use Farisc0de\PhpMigration\Migration;
 
-$db = new Database($config);
-$utils = new Utils();
-$migrate = new Migration($db, $utils);
+$obj = new Migration(new Database($config), new Utils());
 
-// Create Table
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-$migrate->createTable("users", [
-    [
-        'id',
-        Types::Integer(),
-        Options::UnSigned(),
-        Options::NotNull()
-    ]
-]);
+    // Create a new table
+    $obj->createTable(
+        "users",
+        ["id", Types::Integer(), Options::AutoIncrement(), Options::NotNull()],
+        ["username", Types::String(255), Options::NotNull()],
+        ["password", Types::String(255), Options::NotNull()],
+        ["email", Types::String(255), Options::NotNull()],
+        ["created_at", Types::TimeStamp(), Options::CurrentTimeStamp()],
+        ["updated_at", Types::TimeStamp(), Options::CurrentTimeStamp()]
+    );
 
-// Create a primary key
+    // Create Primary Key
+    $obj->setPrimary("users", "id");
 
-$migrate->setPrimary("users", "id"); 
+    // Add a new record
+    $obj->insertValue(
+        "users",
+        [
+            "username" => "admin",
+            "password" => password_hash("admin", PASSWORD_DEFAULT),
+            "email" => "admin@gmail.com",
+        ]
+    );
+
+    $msg = "Database installed successfully!";
 
 ```
 
