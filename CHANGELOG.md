@@ -2,7 +2,7 @@
 
 All notable changes to the PHP Migration Library will be documented in this file.
 
-## [2.0.0] - 2025-01-14
+## [2.0.0](https://github.com/farisc0de/PhpMigration/releases/tag/v2.0.0) - 2025-01-14
 
 ### Breaking Changes
 - Added strict type hints across all classes
